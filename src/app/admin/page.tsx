@@ -1,3 +1,4 @@
+"use client";
 import { useAuthRedirect } from "@/utils/useAuthRedirect";
 import DashboardNav from "@/components/DashboardNav";
 
@@ -22,6 +23,8 @@ export default function AdminDashboard() {
             <a href="/admin/logs" className="inline-block bg-gradient-to-r from-yellow-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold shadow hover:scale-105 transition-transform">Go to View Logs</a>
           </div>
           <div className="mt-4">
+            <a href="/admin/stats" className="inline-block bg-gradient-to-r from-purple-500 to-green-500 text-white px-6 py-3 rounded-xl font-semibold shadow hover:scale-105 transition-transform">Go to View Stats</a>
+          </div>
         </div>
       </div>
     </div>
