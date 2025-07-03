@@ -1,12 +1,15 @@
 "use client";
-import { useAuthRedirect } from "@/utils/useAuthRedirect";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function TeacherStatus() {
-  const { loading, authorized } = useAuthRedirect("teacher");
+  const { user, userData, loading } = useAuth() as any;
+  const router = useRouter();
   const [onLeave, setOnLeave] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,9 +24,15 @@ export default function TeacherStatus() {
   };
 
   useEffect(() => {
-    if (authorized && teacherId) fetchStatus();
+    if (!loading && (!user || userData?.role !== "teacher")) {
+      router.push("/");
+    }
+  }, [user, userData, loading, router]);
+
+  useEffect(() => {
+    if (user && userData?.role === "teacher" && teacherId) fetchStatus();
     // eslint-disable-next-line
-  }, [authorized, teacherId]);
+  }, [user, userData, teacherId]);
 
   const handleToggle = async () => {
     if (!teacherId) return;
@@ -33,8 +42,8 @@ export default function TeacherStatus() {
     setSaving(false);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500"></div></div>;
-  if (!authorized) return null;
+  if (loading) return <LoadingSpinner />;
+  if (!user || userData?.role !== "teacher") return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-green-100 via-purple-100 to-blue-100 p-8">

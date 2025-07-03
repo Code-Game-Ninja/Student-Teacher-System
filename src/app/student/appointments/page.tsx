@@ -1,9 +1,11 @@
 "use client";
-import { useAuthRedirect } from "@/utils/useAuthRedirect";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Appointment {
   id: string;
@@ -14,7 +16,8 @@ interface Appointment {
 }
 
 export default function StudentAppointments() {
-  const { loading, authorized } = useAuthRedirect("student");
+  const { user, userData, loading } = useAuth();
+  const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [fetching, setFetching] = useState(true);
   const studentId = auth.currentUser?.uid;
@@ -29,12 +32,18 @@ export default function StudentAppointments() {
   };
 
   useEffect(() => {
-    if (authorized && studentId) fetchAppointments();
-    // eslint-disable-next-line
-  }, [authorized, studentId]);
+    if (!loading && (!user || userData?.role !== "student")) {
+      router.push("/");
+    }
+  }, [user, userData, loading, router]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500"></div></div>;
-  if (!authorized) return null;
+  useEffect(() => {
+    if (!loading && user && userData?.role === "student" && studentId) fetchAppointments();
+    // eslint-disable-next-line
+  }, [loading, user, userData, studentId]);
+
+  if (loading) return <LoadingSpinner />;
+  if (!user || userData?.role !== "student") return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-green-100 to-pink-100 p-8">

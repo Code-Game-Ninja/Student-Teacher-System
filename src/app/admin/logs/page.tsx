@@ -1,9 +1,11 @@
 "use client";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { useAuthRedirect } from "@/utils/useAuthRedirect";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Appointment {
   id: string;
@@ -15,9 +17,10 @@ interface Appointment {
 }
 
 export default function ViewLogs() {
-  const { loading: authLoading, authorized } = useAuthRedirect("admin");
+  const { user, userData, loading } = useAuth() as any;
+  const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingState, setLoading] = useState(true);
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -27,17 +30,25 @@ export default function ViewLogs() {
   };
 
   useEffect(() => {
-    if (authorized) fetchAppointments();
-  }, [authorized]);
+    if (!loading && (!user || userData?.role !== "admin")) {
+      router.push("/");
+    }
+  }, [user, userData, loading, router]);
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500"></div></div>;
-  if (!authorized) return null;
+  useEffect(() => {
+    if (!loadingState && user && userData?.role === "admin") {
+      fetchAppointments();
+    }
+  }, [loadingState, user, userData]);
+
+  if (loading) return <LoadingSpinner />;
+  if (!user || userData?.role !== "admin") return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-yellow-100 via-purple-100 to-pink-100 p-8">
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-3xl bg-white bg-opacity-90 rounded-3xl shadow-2xl p-8 mt-10">
         <h2 className="text-2xl font-bold text-yellow-700 mb-6">Appointment Logs</h2>
-        {loading ? (
+        {loadingState ? (
           <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div></div>
         ) : appointments.length === 0 ? (
           <div className="text-center text-gray-500 py-10">No appointments found.</div>

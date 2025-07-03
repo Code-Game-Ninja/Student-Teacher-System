@@ -1,9 +1,11 @@
 "use client";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { useAuthRedirect } from "@/utils/useAuthRedirect";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Student {
   id: string;
@@ -13,9 +15,10 @@ interface Student {
 }
 
 export default function ApproveStudents() {
-  const { loading: authLoading, authorized } = useAuthRedirect("admin");
+  const { user, userData, loading } = useAuth() as any;
+  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingState, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchStudents = async () => {
@@ -27,8 +30,14 @@ export default function ApproveStudents() {
   };
 
   useEffect(() => {
-    if (authorized) fetchStudents();
-  }, [authorized]);
+    if (!loading && (!user || userData?.role !== "admin")) {
+      router.push("/");
+    }
+  }, [user, userData, loading, router]);
+
+  useEffect(() => {
+    if (user && userData?.role === "admin") fetchStudents();
+  }, [user, userData]);
 
   const handleApprove = async (id: string) => {
     setActionLoading(id);
@@ -45,14 +54,14 @@ export default function ApproveStudents() {
     setActionLoading(null);
   };
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500"></div></div>;
-  if (!authorized) return null;
+  if (loading) return <LoadingSpinner />;
+  if (!user || userData?.role !== "admin") return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-pink-200 via-yellow-100 to-purple-100 p-8">
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-2xl bg-white bg-opacity-90 rounded-3xl shadow-2xl p-8 mt-10">
         <h2 className="text-2xl font-bold text-pink-700 mb-6">Approve Students</h2>
-        {loading ? (
+        {loadingState ? (
           <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div></div>
         ) : students.length === 0 ? (
           <div className="text-center text-gray-500 py-10">No students pending approval.</div>

@@ -1,9 +1,11 @@
 "use client";
-import { useAuthRedirect } from "@/utils/useAuthRedirect";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/firebase";
 import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Message {
   sender: string;
@@ -17,7 +19,8 @@ interface Thread {
 }
 
 export default function StudentMessages() {
-  const { loading, authorized } = useAuthRedirect("student");
+  const { user, userData, loading } = useAuth();
+  const router = useRouter();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [selected, setSelected] = useState<Thread | null>(null);
   const [reply, setReply] = useState("");
@@ -35,9 +38,15 @@ export default function StudentMessages() {
   };
 
   useEffect(() => {
-    if (authorized && studentId) fetchThreads();
+    if (!loading && (!user || userData?.role !== "student")) {
+      router.push("/");
+    }
+  }, [user, userData, loading, router]);
+
+  useEffect(() => {
+    if (user && userData?.role === "student" && studentId) fetchThreads();
     // eslint-disable-next-line
-  }, [authorized, studentId]);
+  }, [user, userData, studentId]);
 
   const openThread = async (thread: Thread) => {
     // Fetch latest messages
@@ -61,8 +70,8 @@ export default function StudentMessages() {
     setSending(false);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500"></div></div>;
-  if (!authorized) return null;
+  if (loading) return <LoadingSpinner />;
+  if (!user || userData?.role !== "student") return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-pink-100 via-green-100 to-blue-100 p-8">

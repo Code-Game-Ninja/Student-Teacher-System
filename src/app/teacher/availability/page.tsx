@@ -1,9 +1,11 @@
 "use client";
-import { useAuthRedirect } from "@/utils/useAuthRedirect";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/firebase";
 import { collection, addDoc, getDocs, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Slot {
   id: string;
@@ -12,7 +14,8 @@ interface Slot {
 }
 
 export default function TeacherAvailability() {
-  const { loading, authorized } = useAuthRedirect("teacher");
+  const { user, userData, loading } = useAuth();
+  const router = useRouter();
   const [slots, setSlots] = useState<Slot[]>([]);
   const [form, setForm] = useState({ date: "", time: "" });
   const [saving, setSaving] = useState(false);
@@ -30,9 +33,15 @@ export default function TeacherAvailability() {
   };
 
   useEffect(() => {
-    if (authorized && teacherId) fetchSlots();
+    if (!loading && (!user || userData?.role !== "teacher")) {
+      router.push("/");
+    }
+  }, [user, userData, loading, router]);
+
+  useEffect(() => {
+    if (user && userData?.role === "teacher" && teacherId) fetchSlots();
     // eslint-disable-next-line
-  }, [authorized, teacherId]);
+  }, [user, userData, teacherId]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,8 +70,8 @@ export default function TeacherAvailability() {
     await fetchSlots();
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div></div>;
-  if (!authorized) return null;
+  if (loading) return <LoadingSpinner />;
+  if (!user || userData?.role !== "teacher") return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-100 via-green-100 to-purple-100 p-8">
