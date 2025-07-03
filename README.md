@@ -1,3 +1,43 @@
+# Student-Teacher System
+
+A modern, full-stack platform for managing student-teacher interactions with three roles: Admin, Teacher, and Student.
+
+## Tech Stack
+- Next.js (React, TypeScript)
+- Tailwind CSS (UI, animations)
+- Firebase (Auth, Firestore, Storage)
+- Framer Motion (animations)
+- React Icons
+
+## Features
+- **Admin:** Manage teachers, approve students, view logs and stats
+- **Teacher:** Set availability, manage appointments, message students
+- **Student:** Register, search teachers, book appointments, message teachers
+- **Common:** Login, registration, forgot password, modern animated UI
+
+## Setup
+1. Clone the repo and install dependencies:
+   ```bash
+   npm install
+   ```
+2. Add your Firebase config to `.env.local` (see below):
+   ```env
+   NEXT_PUBLIC_FIREBASE_API_KEY=...
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+   NEXT_PUBLIC_FIREBASE_APP_ID=...
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Deploy to Vercel for production.
+
+## Firebase Rules
+See `/firebase.rules.md` for recommended Firestore and Storage rules.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
