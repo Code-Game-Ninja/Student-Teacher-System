@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 interface Message {
   sender: string;
   text: string;
-  timestamp: any;
+  timestamp: Date | string;
 }
 interface Thread {
   id: string;
