@@ -2,7 +2,7 @@
 import { useAuthRedirect } from "@/utils/useAuthRedirect";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/firebase";
-import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, getDoc, setDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
 
 interface Message {
