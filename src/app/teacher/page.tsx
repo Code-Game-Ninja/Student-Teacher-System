@@ -1,3 +1,4 @@
+"use client";
 import { useAuthRedirect } from "@/utils/useAuthRedirect";
 import DashboardNav from "@/components/DashboardNav";
 
