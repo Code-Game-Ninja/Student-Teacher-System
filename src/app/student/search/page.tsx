@@ -31,7 +31,7 @@ export default function StudentSearchTeacher() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setFetching(true);
-    let q = query(collection(db, "users"), where("role", "==", "teacher"));
+    const q = query(collection(db, "users"), where("role", "==", "teacher"));
     const snap = await getDocs(q);
     const teachers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Teacher));
     const filtered = teachers.filter(t =>
@@ -78,8 +78,9 @@ export default function StudentSearchTeacher() {
       });
       closeModal();
       alert("Appointment requested!");
-    } catch (err: any) {
-      setBookError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setBookError(err.message);
+      else setBookError("Unknown error");
     } finally {
       setBooking(false);
     }

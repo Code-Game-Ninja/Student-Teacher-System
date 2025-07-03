@@ -28,8 +28,9 @@ export default function RegisterPage() {
         approved: role === "student" ? false : true, // students need approval
       });
       router.push("/auth/login");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Unknown error");
     } finally {
       setLoading(false);
     }

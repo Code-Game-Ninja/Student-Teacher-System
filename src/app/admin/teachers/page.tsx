@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { db, auth } from "@/firebase";
+import { db } from "@/firebase";
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { motion } from "framer-motion";
 
@@ -74,8 +74,9 @@ export default function ManageTeachers() {
       }
       await fetchTeachers();
       closeModal();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Unknown error");
     } finally {
       setSaving(false);
     }

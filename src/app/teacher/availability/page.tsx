@@ -47,8 +47,9 @@ export default function TeacherAvailability() {
       });
       setForm({ date: "", time: "" });
       await fetchSlots();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Unknown error");
     } finally {
       setSaving(false);
     }

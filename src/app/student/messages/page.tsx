@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 interface Message {
   sender: string;
   text: string;
-  timestamp: any;
+  timestamp: Date | string;
 }
 interface Thread {
   id: string;
@@ -59,20 +59,6 @@ export default function StudentMessages() {
     setReply("");
     await openThread(selected);
     setSending(false);
-  };
-
-  // Start new thread (with teacherId)
-  const startThread = async (teacherId: string) => {
-    if (!studentId) return;
-    const threadId = `${teacherId}_${studentId}`;
-    await setDoc(doc(db, "messages", threadId), {
-      teacherId,
-      studentId,
-      messages: [],
-    }, { merge: true });
-    const docSnap = await getDoc(doc(db, "messages", threadId));
-    setSelected({ id: threadId, teacherId, messages: docSnap.data()?.messages || [] });
-    await fetchThreads();
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500"></div></div>;
